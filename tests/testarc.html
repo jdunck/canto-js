@@ -1,0 +1,76 @@
+<script src="../canto.js"></script>
+<script>
+// test the SVG A path command
+function draw() {
+
+    function rand(x) { return Math.random()*x }
+
+    var x1 = 250, y1 = 250;
+    var x2 = rand(500), y2 = rand(500);
+    var rx = rand(150), ry = rand(150);
+    var rotation = rand(360);
+    var big = Math.floor(rand(2));
+    var clockwise = Math.floor(rand(2));
+
+    var c = canto("canvas1");
+    c.scale(.5,.5);
+
+
+    var svgtext = "";
+
+    function addPath(path, stroke, width) {
+/*
+        var p = document.createElement("svg:path");
+        p.setAttribute("d", path);
+        p.setAttribute("stroke", stroke);
+        p.setAttribute("stroke-width", width);
+        p.setAttribute("fill", "none");
+        s.appendChild(p);
+*/
+
+        svgtext += "<path d='" + path + "' stroke='" + stroke +
+            "' stroke-width='" + width + "' fill='none'/>";
+    }
+
+    c.lineWidth = 3;
+    c.beginPath();
+    c.moveTo(x1,y1);
+    c.A(rx,ry,rotation,0,0,x2,y2);
+    c.stroke({strokeStyle:"black", lineWidth:8});
+
+    addPath("M" + x1 + " " + y1 + "A " + rx + " " + ry + " " + rotation + " 0 0 " + x2 + " " + y2,
+            "black", 8);
+
+    c.beginPath();
+    c.moveTo(x1,y1);
+    c.A(rx,ry,rotation,0,1,x2,y2);
+    c.stroke({strokeStyle:"red", lineWidth:6});
+    addPath("M" + x1 + " " + y1 + "A" + rx + " " + ry + " " + rotation + " 0 1 " + x2 + " " + y2,
+            "red", 6);
+
+    c.beginPath();
+    c.moveTo(x1,y1);
+    c.A(rx,ry,rotation,1,0,x2,y2);
+    c.stroke({strokeStyle:"blue", lineWidth:4});
+    addPath("M" + x1 + " " + y1 + "A " + rx + " " + ry + " " + rotation + " 1 0 " + x2 + " " + y2,
+            "blue", 4);
+
+    c.beginPath();
+    c.moveTo(x1,y1);
+    c.A(rx,ry,rotation,1,1,x2,y2);
+    c.stroke({strokeStyle:"yellow", lineWidth:2});
+    addPath("M" + x1 + " " + y1 + "A " + rx + " " + ry + " " + rotation + " 1 1 " + x2 + " " + y2,
+            "yellow", 2);
+
+    c.fillRect(x1-5, y1-5,10,10,{fillStyle:"red"});
+    c.fillRect(x2-5, y2-5,10,10,{fillStyle:"blue"});
+
+    var div = document.createElement("span");
+    div.innerHTML = "<svg  width=300 height=300 viewbox='0 0 600 600'>" +
+        svgtext+"</svg>";
+    document.body.appendChild(div);
+}
+</script>
+<body onload="draw()">
+<canvas id="canvas1" width=300 height=300></canvas>
+</body>

@@ -1,0 +1,26 @@
+<script src="../canto.js"></script>
+<script>
+// test the SVG A path command
+function draw() {
+    var c = canto("canvas1");
+    c.scale(.5,.5);
+
+    c.M(300,200).h(-150).
+        a(150,150,0,1,0,150,-150).z().
+        paint({fillStyle:"red", strokeStyle:"blue",lineWidth:5});
+
+    c.beginPath().moveTo(275,175).rlineTo(0,-150).
+        a(150,150,0,0,0, -150,150).closePath().
+        paint({fillStyle:"yellow", strokeStyle:"blue",lineWidth:5});
+
+    c.beginPath().M(600,350).l(50,-25).a(25,25,-30,0,1,50,-25);
+    c.l(50,-25).a(25,50,-30,0,1,50,-25);
+    c.l(50,-25).a(25,75,-30,0,1,50,-25);
+    c.l(50,-25).a(25,100,-30,0,1,50,-25);
+    c.l(50,-25);
+    c.stroke({strokeStyle:"red", lineWidth:5});
+}
+</script>
+<body onload="draw()">
+<canvas id="canvas1" width=600 height=600></canvas>
+</body>

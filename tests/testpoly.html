@@ -1,0 +1,38 @@
+<script src="../canto.js"></script>
+<script>
+// Test polygon, rounded corners, and turtle graphics, relative lines, etc.
+function draw() {
+    var c = canto("canvas1");
+    c.angleUnit = "degrees";
+
+    c.polygon(100, 100, 200, 200, 100, 200, 25)
+        .polygon(100, 100, 100, 200, 200, 200,10)
+        .penDown().right(90).forward(200).left(30).back(80).closePath()
+        .paint({
+            lineWidth: 3,
+            strokeStyle: "red",
+            fillStyle: "gray",
+            lineJoin: "round"
+        });
+
+    c.beginPath().moveTo(100, 100, 200, 200, 100, 200).closePath().stroke();
+
+    c.beginPath().moveTo(300, 100).
+        rlineTo(100, 0).rlineTo(0,100).rlineTo(-100,0).
+        closePath().fill("fillStyle",
+                         c.createLinearGradient(300,100,400,200,
+                                                0.0, "blue", 1.0, "red"));
+
+/*
+  // additional tests: copy the image to a data: url, and reset the canvas
+    var txt = c.toDataURL();
+    var img = document.createElement("img");
+    img.src = txt;
+    document.body.appendChild(img);
+    c.reset();
+*/
+}
+</script>
+<body onload="draw()">
+<canvas id="canvas1" width=600 height=600></canvas>
+</body>

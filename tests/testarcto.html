@@ -1,0 +1,32 @@
+<script src="../canto.js"></script>
+<script>
+// Load this page multiple times.
+// It should always draw one line with no break where the rlineto
+// connects the line to the end of the curve.  This tests that my arcTo
+// implementation computes the correct current point.
+function draw() {
+    var c = canto("canvas1");
+
+    function rand() {
+        return 300 + (Math.random()-0.5)*500;
+    }
+
+    var x0 = rand(), y0 = rand();
+    var x1 = rand(), y1 = rand();
+    var x2 = rand(), y2 = rand();
+    var x3 = rand(), y3 = rand();
+
+    c.moveTo(x0,y0).arcTo(x1,y1,x2,y2,20);
+
+    // If arcTo() computes the current point correctly
+    // then the code below draws the same line back and forth.
+    // If two lines are visible, then the current point is incorrect.
+    var cx = c.currentX, cy = c.currentY;
+    c.rlineTo(x3-cx, y3-cy);  
+    c.lineTo(cx,cy);
+    c.stroke();
+}
+</script>
+<body onload="draw()">
+<canvas id="canvas1" width=600 height=600></canvas>
+</body>

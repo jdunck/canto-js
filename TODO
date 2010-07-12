@@ -1,0 +1,68 @@
+I've got svgpath() now.  Add compileSVGPath, which returns a function
+that can be invoked to draw the path.  Maybe take optional x,y coords
+and translate to those before drawing, and then restore before
+returning? Will it take the context as its first arg and be
+context-independent? (Then a static method canto.compileSVGPath()?)  Or
+will it encapsulate the this value? Or will it compile to a new method
+of the canto object?
+
+Define a method for establishing a coordinate system, like the svg
+viewBox attribute.  Also a simple method for flipping the X axis.
+
+Use conditional comments or __defineGetter__ etc. to hide the 
+getters and setters from IE.
+
+For IE compatibility, users will have to stick to method-based attribute
+setting, which is the better API anyway.  As an alternative, I could, in
+IE, build out a more complex system of keeping the graphics state in
+sync across save and restore, etc.
+
+Add a polyline() function that works like polygon() with optional
+corner radius. Or maybe just add this to the L and l methods?
+
+Some standard way to invoke a drawing subroutine with automatic
+save/restore protection and automatic setting of a bunch of default
+attributes.  Some similar way to add new methods that behave like
+drawing primitives?
+
+Make turtle graphics orientation a settable and queryable attribute?
+something saved by save/restore
+          
+A curve() method that does a quadratic or cubic Bezier curve
+depending on the number of arguments?
+
+A way to use arc() without having it draw from the current point to
+the start of the curve?
+
+Methods that operate on a polyline specified as an array of points.
+one method to just connect them all open or closed, forward or backward.
+another method to connect them with rounded corners using arcTo?
+    I can do this.L.apply(this,points_array) for polylines, but
+      do I want something with a name?  
+
+A way to query the current path as an object or SVG string?
+  
+Allow canvases to parameterize themselves by setting data- attributes?
+  These could specify default graphics attributes.
+
+      Should data- attributes on the canvas set default drawing
+      attributes?  <canvas data-linewidth=5 data-lineJoin="miter">?
+
+For any attribute whose value is a string (such as colors) I could
+  treat strings that begin with $ specially and look them up as data
+  attributes. (or in some other name/value mapping associated with the
+  canvas) 
+
+Is there any way to use the CSS computed style of the canvas to set 
+  default graphics attributes?  If so, then style and class attributes
+  on the canvas could affect the drawing in a very natural way.
+
+Some way to automatically draw into a canvas on load?
+
+Process script tags that have type = x-text/canto as drawing 
+  functions.  Replace script with a canvas and eval the script to draw
+  into it?
+
+jQuery integration?  What would that mean?
+ */
+

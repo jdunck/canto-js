@@ -1,0 +1,24 @@
+<script src="../canto.js"></script>
+<script>
+function draw() {
+    var c = canto("canvas1");
+
+    function rand(x) { return Math.random()*x }
+
+    c.angleUnit = "degrees";
+
+    for(var i = 0; i < 10; i++) {
+        var cx = rand(500), cy = rand(500);
+        var rx = rand(150), ry = rand(150);
+        var rotation = rand(360), sa = rand(360), ea = rand(360);
+        var direction = (rand(2) > 1);
+
+        c.beginPath();
+        c.ellipse(cx,cy,rx,ry,rotation,sa,ea,direction);
+        c.stroke();
+    }
+}
+</script>
+<body onload="draw()">
+<canvas id="canvas1" width=600 height=600></canvas>
+</body>

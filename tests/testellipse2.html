@@ -1,0 +1,24 @@
+<script src="../canto.js"></script>
+<script>
+function draw() {
+    var c = canto("canvas1");
+    c.angleUnit = "degrees";
+
+    c.markcp = function() {
+        this.fillRect(this.currentX-2,this.currentY-2,4,4,{fillStyle:"red"});
+    }
+
+    for(var r = 0; r < 10; r++)
+        c.beginPath().ellipse(200,200,100-5*r,50-3*r,0).stroke().markcp();
+
+    for(var r = 0; r < 10; r++)
+        c.beginPath().ellipse(400,200,100,50,r*18).stroke().markcp();
+
+    for(var r = 0; r < 10; r++)
+        c.beginPath().ellipse(200,300,100,50,0,r*35, r*35+17).stroke().markcp();
+
+}
+</script>
+<body onload="draw()">
+<canvas id="canvas1" width=600 height=600></canvas>
+</body>
