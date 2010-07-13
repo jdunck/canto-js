@@ -21,7 +21,7 @@
  */
 
 /**
- * canto.js: an improved API for drawing in canvases.  Version 0.1
+ * canto.js: an improved API for drawing in canvases.  Version 0.11
  * 
  * Invoke the canto() factory function with an <canvas> element or the id
  * of a canvas element.  It returns an object that implements the 2D canvas
@@ -84,6 +84,23 @@
  *   toDataURL()
  *
  * - a reset() method that clears and resets the state of the canvas
+ *
+ * Current limitations:
+ * 
+ * - Canto uses getters and setters; therefore, it does not work in IE.
+ * 
+ * - Canto does not keep track of the current point or the start of
+ *   the current subpath across transformations.  This means that if
+ *   you do a transform (translate, scale, rotate, transform, setTransform)
+ *   you cannot use relative motion commands until you have established
+ *   a new current point (with moveTo() or lineTo(), for example).  Also,
+ *   you cannot use a relative motion command after closePath() if you
+ *   performed a transformation after establishing the initial point of
+ *   that subpath. This also applies to the non-relative path commands 
+ *   H(), V(), S(), T(), A(), and arcTo(). This restriction won't effect you
+ *   if you set up your coordinate transformations before defining your
+ *   paths.  The fix to this limitation involves tracking the current 
+ *   transformation matrix across save/restore boundaries.
  */
 var canto = (function() {
 
@@ -474,7 +491,7 @@ var canto = (function() {
          * (with moveTo(), lineTo(), e.g.) before you can use any relative
          * path segment commands (such as rlineTo()).
          */
-        transform: wrapAndReturn("transform"),
+        transform: transform,
 
         // XXX:
         // this method does not correctly update the current point
@@ -490,7 +507,7 @@ var canto = (function() {
          * (with moveTo(), lineTo(), e.g.) before you can use any relative
          * path segment commands (such as rlineTo()).
          */
-        setTransform: wrapAndReturn("setTransform"),
+        setTransform: setTransform,
 
         /*
          * Patterns and gradients
@@ -716,10 +733,17 @@ var canto = (function() {
     }
     // Relative moveto
     function m(x,y) {
-        if (this.currentX !== undefined) {
-            x += this.currentX;
-            y += this.currentY;
+        if (this._pathIsEmpty) {
+            // From the SVG spec: "If a relative moveto (m) appears as
+            // the first element of the path, then it is treated as a
+            // pair of absolute coordinates."
+            this.currentX = 0; this.currentY = 0;
         }
+        checkcurrent(this);
+
+        x += this.currentX;
+        y += this.currentY;
+
         this._.moveTo(x,y);
         setcurrent(this, x, y);
         this.startSubpathX = x;
@@ -740,18 +764,11 @@ var canto = (function() {
     // Relative lineto
     function l(x,y) {
         check(arguments, 0, 2, 2);
-        if (this.currentX === undefined) {  // if no current point
-            M.call(this, x, y);         // do an absolute moveto
-            if (arguments.length > 2)       // and recurse for rest of args
-                l.apply(this,slice(arguments,2));
-        }
-        else {
-            var cx = this.currentX, cy = this.currentY;
-            for(var i = 0; i < arguments.length; i += 2)
-                this._.lineTo(cx += arguments[i], cy += arguments[i+1]);
-            setcurrent(this,cx,cy);
-        }
-
+        checkcurrent(this);
+        var cx = this.currentX, cy = this.currentY;
+        for(var i = 0; i < arguments.length; i += 2)
+            this._.lineTo(cx += arguments[i], cy += arguments[i+1]);
+        setcurrent(this,cx,cy);
         return this;
     }
 
@@ -763,6 +780,7 @@ var canto = (function() {
     }
 
     function H(x) {
+        checkcurrent(this);
         for(var i = 0; i < arguments.length; i++) 
             L.call(this, arguments[i], this.currentY);
         return this;
@@ -773,6 +791,7 @@ var canto = (function() {
         return this;
     }
     function V(y) {
+        checkcurrent(this);
         for(var i = 0; i < arguments.length; i++) 
             L.call(this, this.currentX, arguments[i]);
         return this;
@@ -796,7 +815,7 @@ var canto = (function() {
     }
     function c(cx1,cy1,cx2,cy2,x,y) {
         check(arguments, 0, 6, 6)
-        ensure(this);
+        checkcurrent(this);
         var x0 = this.currentX, y0 = this.currentY;
         for(var i = 0; i < arguments.length; i+=6)   // polycurves
             this._.bezierCurveTo(x0 + arguments[i],
@@ -822,7 +841,7 @@ var canto = (function() {
     }
     function q(cx,cy,x,y) {
         check(arguments, 0, 4, 4);
-        ensure(this); 
+        checkcurrent(this);
         var x0 = this.currentX, y0 = this.currentY;
         for(var i = 0; i < arguments.length; i+=4) 
             this._.quadraticCurveTo(cx = x0 + arguments[i],
@@ -837,6 +856,7 @@ var canto = (function() {
         check(arguments, 0, 4, 4);
         if (!this._lastCCP)
             throw new Error("Last command was not a cubic bezier");
+        checkcurrent(this);
         var x0 = this.currentX, y0 = this.currentY;
         var cx0 = this._lastCCP[0], cy0 = this._lastCCP[0];
         for(var i = 0; i < arguments.length; i+=4) {
@@ -854,6 +874,7 @@ var canto = (function() {
         check(arguments, 0, 4, 4);
         if (!this._lastCCP)
             throw new Error("Last command was not a cubic bezier");
+        checkcurrent(this);
         var x0 = this.currentX, y0 = this.currentY;
         var cx0 = this._lastCCP[0], cy0 = this._lastCCP[0];
         for(var i = 0; i < arguments.length; i+=4) {
@@ -871,6 +892,7 @@ var canto = (function() {
         check(argument, 0, 2, 2);
         if (!this._lastQCP)
             throw new Error("Last command was not a cubic bezier");
+        checkcurrent(this);
         var x0 = this.currentX, y0 = this.currentY;
         var cx0 = this._lastQCP[0], cy0 = this._lastQCP[0];
         for(var i = 0; i < arguments.length; i+=2) {
@@ -887,6 +909,7 @@ var canto = (function() {
         check(argument, 0, 2, 2);
         if (!this._lastQCP)
             throw new Error("Last command was not a cubic bezier");
+        checkcurrent(this);
         var x0 = this.currentX, y0 = this.currentY;
         var cx0 = this._lastQCP[0], cy0 = this._lastQCP[0];
         for(var i = 0; i < arguments.length; i+=2) {
@@ -901,6 +924,7 @@ var canto = (function() {
     }
 
     // Draw an ellipse segment from the current point to (x,y)
+    // XXX: is this supposed to allow multiple arcs in a single call?
     function A(rx,ry,rotation,big,clockwise,x,y) {
         // This math is from Appendix F, Implementation Notes of 
         // the SVG specification.  See especially F.6.5.
@@ -916,6 +940,7 @@ var canto = (function() {
         big = Boolean(big);
         clockwise = Boolean(clockwise);
 
+        checkcurrent(this);
         var x1 = this.currentX, y1 = this.currentY;  // start point of arc
         var x2 = x, y2 = y;                          // end point of arc
 
@@ -983,7 +1008,9 @@ var canto = (function() {
         this._useDegrees = olddegrees;
         return this;
     }
+
     function a(rx,ry,rotation,big,clockwise,x,y) {
+        checkcurrent(this);
         A.call(this,rx,ry,rotation,big,clockwise,
                    x + this.currentX, y + this.currentY);
         return this;
@@ -996,12 +1023,14 @@ var canto = (function() {
         this._.beginPath();
         setcurrent(this, undefined, undefined);
         this.startSubpathX = this.startSubpathY = undefined;
+        this._pathIsEmpty = true;
         return this;
     }
 
     // Canvas arcTo command, with extra math to track the current point
     function arcTo(x1,y1,x2,y2,r) {
         ensure(this,x1,y1);
+        checkcurrent(this);
         this._.arcTo(x1,y1,x2,y2,r);
 
         // Do some math to compute the current point here
@@ -1263,7 +1292,7 @@ var canto = (function() {
     function fd(d) {
         var dx = d*cos(this._orientation);
         var dy = d*sin(this._orientation);
-        if (this._penup) this.rmoveto(dx,dy);
+        if (this._penup) this.m(dx,dy);
         else this.l(dx,dy);
         return this;
     }
@@ -1272,7 +1301,7 @@ var canto = (function() {
     function bk(d) {
         var dx = -d*cos(this._orientation);
         var dy = -d*sin(this._orientation);
-        if (this._penup) this.rmoveto(dx,dy);
+        if (this._penup) this.m(dx,dy);
         else this.l(dx,dy);
         return this;
     }
@@ -1294,47 +1323,46 @@ var canto = (function() {
     /*
      * Transformations
      *
-     * XXX: do these transform the current point correctly?
+     * XXX: All of these functions lose track of the current point and
+     *  subpath start point.  (To track those points properly would require
+     *  special handling in save() and restore().)  So you can't use
+     *  relative motion commands after doing a transformation and before
+     *  establishing a new current point.  Also, a number of other 
+     *  arc and curve commands require a current point
      */
     function translate(dx,dy) {
         this._.translate(dx,dy);
-        if (this.currentX !== undefined) {
-            this.currentX -= dx;
-            this.currentY -= dy;
-        }
-        if (this.startSubpathX !== undefined) {
-            this.startSubpathX -= dx;
-            this.startSubpathY -= dy;
-        }
+        this.currentX = this.currentY = undefined;
+        this.startSubpathX = this.startSubpathY = undefined;
         return this;
     }
 
     function scale(x,y) {
         this._.scale(x,y);
-        if (this.currentX !== undefined) {
-            this.currentX /= x;
-            this.currentY /= y;
-        }
-        if (this.startSubpathX !== undefined) {
-            this.startSubpathX /= x;
-            this.startSubpathY /= y;
-        }
+        this.currentX = this.currentY = undefined;
+        this.startSubpathX = this.startSubpathY = undefined;
         return this;
     }
 
     function rotate(angle) {
         angle = convertAngle(this,angle);
         this._.rotate(angle);
-        if (this.currentX) {
-            var p = rotatePoint(this.currentX, this.currentY, -angle)
-            this.currentX = p[0];
-            this.currentY = p[1];
-        }
-        if (this.startSubpathX) {
-            var p = rotatePoint(this.startSubpathX, this.startSubpathY, -angle)
-            this.startSubpathX = p[0];
-            this.startSubpathY = p[1];
-        }
+        this.currentX = this.currentY = undefined;
+        this.startSubpathX = this.startSubpathY = undefined;
+        return this;
+    }
+
+    function transform() {
+        this._.transform.apply(this._, arguments);
+        this.currentX = this.currentY = undefined;
+        this.startSubpathX = this.startSubpathY = undefined;
+        return this;
+    }
+
+    function setTransform() {
+        this._.setTransform.apply(this._, arguments);
+        this.currentX = this.currentY = undefined;
+        this.startSubpathX = this.startSubpathY = undefined;
         return this;
     }
 
@@ -1458,25 +1486,24 @@ var canto = (function() {
 
     // A utility function: if there is no current supath, then start one
     // at this point.  This is from the spec.
-    // If x and y are not specified, then just throw an error if there is
-    // no current point: used for SVG-compatible relative path commands.
     function ensure(c,x,y) {
-        if (c.startSubpathX === undefined) {
-            if (arguments.length === 3) {
-                c.startSubpathX = x;
-                c.startSubpathY = y;
-            }
-            else throw new Error("no current point");
-        }
+        if (c._pathIsEmpty) c.moveTo(x,y);
     }
     
     function setcurrent(c,x,y) {
         c.currentX = x;
         c.currentY = y;
-        c.lastCCP = null;  // Reset control point status
-        c.lastQCP = null;
+        c._lastCCP = null;  // Reset control point status
+        c._lastQCP = null;
+        c._pathIsEmpty = false;
     }
 
+    // Check that the current point is defined and throw an exception if
+    // it is not defined.  This is used by relative motion commands.
+    function checkcurrent(c) {
+        if (c.currentX === undefined) 
+            throw new Error("No current point; can't use relative coordinates");
+    }
 
     // Utility function to convert a string to an Image object
     function getImage(img) {

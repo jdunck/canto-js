@@ -2,13 +2,9 @@
 <script>
 // test the SVG A path command
 function draw() {
-    canto("canvas1").
-        svgpath("M100,10 L100,10 40,180 190,60 10,60 160,180 z").
-        stroke();
-
-    canto("canvas1").translate(200, 0).
-        svgpath("M10,150 A15 15 180 0 1 70 140 A15 25 180 0 0 130 130 A15 55 180 0 1 190 120").
-        stroke();
+    canto("canvas1").svgpath("M100 100 L200 200 100 200 Z").fill();
+    canto("canvas1").translate(200,0).
+        M(100,100).L(200,200,100,200).Z().stroke();
 }
 </script>
 <body onload="draw()">
