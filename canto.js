@@ -73,7 +73,12 @@
  * - drawImage() and createPattern() accept a string as the image argument
  *   If it begins with # it is taken as an element id. Otherwise it is taken
  *   as an image URL.
- *
+ *     XXX: WARNING: drawImage() will ignore images that are not fully loaded
+ *      yet, so specifying an image as a URL will probably not work unless
+ *      the image is already in the browser cache.  So maybe I'll just say
+ *      that any string is an element id and remove the URL capability 
+ *      completely.  Alternatively, would some kind of async drawImage() work?
+ *    
  * - the create*Gradient() methods accept a list of color stops so you can
  *   create gradients in a single step
  * 
@@ -1000,7 +1005,7 @@ var canto = (function() {
         var theta2 = theta1 + dtheta;
 
         // Now after all that computation, we can implement the SVG
-        // A command using an extension of the canvas arcTo method
+        // A command using an extension of the canvas arc() method
         // that allows stretching and rotation
         var olddegrees = this._useDegrees;
         this._useDegrees = false;
@@ -1032,6 +1037,11 @@ var canto = (function() {
         ensure(this,x1,y1);
         checkcurrent(this);
         this._.arcTo(x1,y1,x2,y2,r);
+
+        // XXX
+        // Add code to handle the degenerate case: if P0==P1 or 
+        // P1==P2 or r==0, then this is just a straight line
+        // and the current point is just (x1,y1)
 
         // Do some math to compute the current point here
         // Definitions: 
@@ -1506,11 +1516,15 @@ var canto = (function() {
     }
 
     // Utility function to convert a string to an Image object
+    // XXX: Specifying a URL probably won't work unless that URL
+    //  is already loaded in the browser cache.  The canvas can ignore
+    //  drawImage requests if the image object has not yet finished 
+    //  loading.  I may need to remove that bit of the API.
     function getImage(img) {
         if (typeof img !== "string") return img;
         var image = null;
         if (img.charAt(0) === '#') // image is probably an element id
-            image = document.getElementById(image.substring(1));
+            image = document.getElementById(img.substring(1));
         if (!image) {        // Otherwise, assume img is a URL
             image = new Image();
             image.src = img;
