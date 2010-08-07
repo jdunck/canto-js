@@ -830,7 +830,7 @@ var canto = (function() {
                                  x0 += arguments[i+4],
                                  y0 += arguments[i+5]);
         setcurrent(this,x0,y0);
-        this.lastCCP = [cx2,cy2];
+        this._lastCCP = [cx2,cy2];
         return this;
     }
     function Q(cx,cy,x,y) {
@@ -865,9 +865,9 @@ var canto = (function() {
         var x0 = this.currentX, y0 = this.currentY;
         var cx0 = this._lastCCP[0], cy0 = this._lastCCP[0];
         for(var i = 0; i < arguments.length; i+=4) {
+            var cx1 = x0 + (x0-cx0), cy1 = y0 + (y0-cy0);
             var cx2 = arguments[i], cy2 = arguments[i+1];
             var x = arguments[i+2], y = arguments[i+3];
-            var cx1 = x0 + (x0-cx0), cy1 = y0 + (y0-cy1);
             this._.bezierCurveTo(cx1,cy1,cx2,cy2,x,y);
             x0 = x; y0 = y; cx0 = cx2, cy0 = cy2;
         }
@@ -883,9 +883,9 @@ var canto = (function() {
         var x0 = this.currentX, y0 = this.currentY;
         var cx0 = this._lastCCP[0], cy0 = this._lastCCP[0];
         for(var i = 0; i < arguments.length; i+=4) {
+            var cx1 = x0 + (x0-cx0), cy1 = y0 + (y0-cy0);
             var cx2 = x0+arguments[i], cy2 = y0+arguments[i+1];
             var x = x0+arguments[i+2], y = y0+arguments[i+3];
-            var cx1 = x0 + (x0-cx0), cy1 = y0 + (y0-cy1);
             this._.bezierCurveTo(cx1,cy1,cx2,cy2,x,y);
             x0 = x; y0 = y; cx0 = cx2, cy0 = cy2;
         }
@@ -894,15 +894,15 @@ var canto = (function() {
         return this;
     }
     function T(/*x,y*/) {
-        check(argument, 0, 2, 2);
+        check(arguments, 0, 2, 2);
         if (!this._lastQCP)
             throw new Error("Last command was not a cubic bezier");
         checkcurrent(this);
         var x0 = this.currentX, y0 = this.currentY;
         var cx0 = this._lastQCP[0], cy0 = this._lastQCP[0];
         for(var i = 0; i < arguments.length; i+=2) {
+            var cx = x0 + (x0-cx0), cy = y0 + (y0-cy0);
             var x = arguments[i], y = arguments[i+1];
-            var cx = x0 + (x0-cx0), cy = y0 + (y0-cy1);
             this._.quadraticCurveTo(cx,cy,x,y);
             x0 = x; y0 = y; cx0 = cx, cy0 = cy;
         }
@@ -911,15 +911,15 @@ var canto = (function() {
         return this;
     }
     function t(/*x,y*/) {
-        check(argument, 0, 2, 2);
+        check(arguments, 0, 2, 2);
         if (!this._lastQCP)
             throw new Error("Last command was not a cubic bezier");
         checkcurrent(this);
         var x0 = this.currentX, y0 = this.currentY;
         var cx0 = this._lastQCP[0], cy0 = this._lastQCP[0];
         for(var i = 0; i < arguments.length; i+=2) {
+            var cx = x0 + (x0-cx0), cy = y0 + (y0-cy0);
             var x = x0 + arguments[i], y = y0 + arguments[i+1];
-            var cx = x0 + (x0-cx0), cy = y0 + (y0-cy1);
             this._.quadraticCurveTo(cx,cy,x,y);
             x0 = x; y0 = y; cx0 = cx, cy0 = cy;
         }

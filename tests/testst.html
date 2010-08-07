@@ -1,0 +1,11 @@
+<script src="../canto.js"></script>
+<script>
+// Paths from a bug report by Sven Drieling 
+function draw() {
+    canto("canvas1").svgpath("M75 60 Q125 190 175 60 T240 60").stroke();
+    canto("canvas1").svgpath("M30 150 C30 20 150 150 150 20 S220 20 220 150").stroke();
+}
+</script>
+<body onload="draw()">
+<canvas id="canvas1" width=600 height=600></canvas>
+</body>
