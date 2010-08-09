@@ -863,7 +863,7 @@ var canto = (function() {
             throw new Error("Last command was not a cubic bezier");
         checkcurrent(this);
         var x0 = this.currentX, y0 = this.currentY;
-        var cx0 = this._lastCCP[0], cy0 = this._lastCCP[0];
+        var cx0 = this._lastCCP[0], cy0 = this._lastCCP[1];
         for(var i = 0; i < arguments.length; i+=4) {
             var cx1 = x0 + (x0-cx0), cy1 = y0 + (y0-cy0);
             var cx2 = arguments[i], cy2 = arguments[i+1];
@@ -881,7 +881,7 @@ var canto = (function() {
             throw new Error("Last command was not a cubic bezier");
         checkcurrent(this);
         var x0 = this.currentX, y0 = this.currentY;
-        var cx0 = this._lastCCP[0], cy0 = this._lastCCP[0];
+        var cx0 = this._lastCCP[0], cy0 = this._lastCCP[1];
         for(var i = 0; i < arguments.length; i+=4) {
             var cx1 = x0 + (x0-cx0), cy1 = y0 + (y0-cy0);
             var cx2 = x0+arguments[i], cy2 = y0+arguments[i+1];
@@ -899,7 +899,7 @@ var canto = (function() {
             throw new Error("Last command was not a cubic bezier");
         checkcurrent(this);
         var x0 = this.currentX, y0 = this.currentY;
-        var cx0 = this._lastQCP[0], cy0 = this._lastQCP[0];
+        var cx0 = this._lastQCP[0], cy0 = this._lastQCP[1];
         for(var i = 0; i < arguments.length; i+=2) {
             var cx = x0 + (x0-cx0), cy = y0 + (y0-cy0);
             var x = arguments[i], y = arguments[i+1];
@@ -916,7 +916,7 @@ var canto = (function() {
             throw new Error("Last command was not a cubic bezier");
         checkcurrent(this);
         var x0 = this.currentX, y0 = this.currentY;
-        var cx0 = this._lastQCP[0], cy0 = this._lastQCP[0];
+        var cx0 = this._lastQCP[0], cy0 = this._lastQCP[1];
         for(var i = 0; i < arguments.length; i+=2) {
             var cx = x0 + (x0-cx0), cy = y0 + (y0-cy0);
             var x = x0 + arguments[i], y = y0 + arguments[i+1];
