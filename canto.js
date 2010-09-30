@@ -853,7 +853,7 @@ var canto = (function() {
                                     cy = y0 + arguments[i+1],
                                     x0 += arguments[i+2],
                                     y0 += arguments[i+3]);
-        setcurrent(x0,y0);
+        setcurrent(this,x0,y0);
         this._lastQCP = [cx,cy];
         return this;
     }
@@ -871,7 +871,7 @@ var canto = (function() {
             this._.bezierCurveTo(cx1,cy1,cx2,cy2,x,y);
             x0 = x; y0 = y; cx0 = cx2, cy0 = cy2;
         }
-        setcurrent(x0,y0);
+        setcurrent(this,x0,y0);
         this._lastCCP = [cx0,cy0];
         return this;
     }
@@ -889,7 +889,7 @@ var canto = (function() {
             this._.bezierCurveTo(cx1,cy1,cx2,cy2,x,y);
             x0 = x; y0 = y; cx0 = cx2, cy0 = cy2;
         }
-        setcurrent(x0,y0);
+        setcurrent(this,x0,y0);
         this._lastCCP = [cx0,cy0];
         return this;
     }
@@ -906,7 +906,7 @@ var canto = (function() {
             this._.quadraticCurveTo(cx,cy,x,y);
             x0 = x; y0 = y; cx0 = cx, cy0 = cy;
         }
-        setcurrent(x0,y0);
+        setcurrent(this,x0,y0);
         this._lastQCP = [cx0,cy0];
         return this;
     }
@@ -923,7 +923,7 @@ var canto = (function() {
             this._.quadraticCurveTo(cx,cy,x,y);
             x0 = x; y0 = y; cx0 = cx, cy0 = cy;
         }
-        setcurrent(x0,y0);
+        setcurrent(this,x0,y0);
         this._lastQCP = [cx0,cy0];
         return this;
     }
