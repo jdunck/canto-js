@@ -713,7 +713,6 @@ var canto = (function() {
         // by a string of numbers separated by spaces and/or commas
         for(var i = 0; i < elements.length; i++) {
             var element = elements[i];           // Single path element
-            console.log(element);
             var cmd = element.charAt(0);         // The command letter
             var args = element.match(svgnumber); // The numeric arguments
             var numbers = [];                    // To hold parsed args
@@ -721,7 +720,6 @@ var canto = (function() {
                 for(var j = 0; j < args.length; j++)
                     numbers[j] = Number(args[j]);    // Convert args to numbers
             }
-            console.log(numbers.join(","));
             // Command letters are all method names
             this[cmd].apply(this, numbers);
         }
