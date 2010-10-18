@@ -697,26 +697,33 @@ var canto = (function() {
     var acos = Math.acos, sqrt = Math.sqrt, abs = Math.abs;
     var pi = Math.PI, twopi = 2*Math.PI;
 
-    var svgpattern = /[MmLlZzHhVvCcQqSsTtAa]\s*(\d+[,\s]*)*/g;
+    // optional sign, digits (3 forms), optional exponent
+    var svgnumber = /[+-]?(\.\d+|\d+\.\d*|\d+)([Ee][+-]?\d+)?/g;
+
+    // path letter, optional space, any # of (num, optional space and/or comma)
+    var svgpathelt = /[MmLlZzHhVvCcQqSsTtAa]\s*(([+-]?(\d+|\d+\.\d*|\.\d+)([Ee][+-]?\d+)?)(,\s*|\s+,?\s*)?)*/g;
 
     // Parse an SVG path string and invoke the various SVG commands
     // Note that this does not call beginPath()
     function svgpath(text) {
-        var matches = text.match(svgpattern);
-        if (!matches) throw new Error("Bad path: " + text);
+        var elements = text.match(svgpathelt);
+        if (!elements) throw new Error("Bad path: " + text);
 
-        // Each element of matches should begin with a SVG path letter
-        // and be followed by a string of numbers separated by spaces
-        // and/or commas
-        for(var i = 0; i < matches.length; i++) {
-            var match = matches[i];
-            var cmd = match.charAt(0);
-            // Get rest and trim whitespace from it
-            var rest = match.substring(1).replace(/^\s+|\s+$/g, "");
-            var split = rest.split(/\s+|\s*,\s*/);
-            var coords = [];
-            for(var j = 0; j < split.length; j++) coords[j] = Number(split[j]);
-            this[cmd].apply(this, coords);
+        // Each element should begin with a SVG path letter and be followed
+        // by a string of numbers separated by spaces and/or commas
+        for(var i = 0; i < elements.length; i++) {
+            var element = elements[i];           // Single path element
+            console.log(element);
+            var cmd = element.charAt(0);         // The command letter
+            var args = element.match(svgnumber); // The numeric arguments
+            var numbers = [];                    // To hold parsed args
+            if (args) {  // The z command has no arguments
+                for(var j = 0; j < args.length; j++)
+                    numbers[j] = Number(args[j]);    // Convert args to numbers
+            }
+            console.log(numbers.join(","));
+            // Command letters are all method names
+            this[cmd].apply(this, numbers);
         }
         return this;
     }
